@@ -19,4 +19,8 @@ RUN cd /app && pipenv install --system --deploy
 
 COPY . /app
 
+RUN chown -R app:app /app /var/www/app
+
+USER app
+
 CMD uwsgi --http :5000 --master --enable-threads -s /var/www/app/app.sock --manage-script-name --mount /=app:app
