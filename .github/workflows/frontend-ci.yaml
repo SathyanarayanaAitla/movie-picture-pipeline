@@ -4,9 +4,6 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - "starter/frontend/**"
-      - ".github/workflows/frontend-ci.yaml"
   workflow_dispatch:
 
 jobs:
@@ -24,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: starter/frontend/.nvmrc
+          node-version: "18.14.2"
           cache: npm
           cache-dependency-path: starter/frontend/package-lock.json
 
@@ -48,7 +45,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: starter/frontend/.nvmrc
+          node-version: "18.14.2"
           cache: npm
           cache-dependency-path: starter/frontend/package-lock.json
 
@@ -70,17 +67,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: starter/frontend/.nvmrc
-          cache: npm
-          cache-dependency-path: starter/frontend/package-lock.json
-
-      - name: Install dependencies
-        working-directory: starter/frontend
-        run: npm ci
 
       - name: Build Docker image
         run: |
