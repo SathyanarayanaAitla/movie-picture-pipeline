@@ -1,4 +1,4 @@
-name: Frontend CD
+name: Frontend Continuous Deployment
 
 on:
   push:
@@ -10,7 +10,59 @@ on:
   workflow_dispatch:
 
 jobs:
-  frontend-cd:
+  frontend-lint:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: starter/frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18.14.2"
+          cache: npm
+          cache-dependency-path: starter/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+  frontend-test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: starter/frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18.14.2"
+          cache: npm
+          cache-dependency-path: starter/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test -- --watchAll=false
+
+  frontend-build-deploy:
+    needs:
+      - frontend-lint
+      - frontend-test
+
     runs-on: ubuntu-latest
 
     steps:
@@ -32,13 +84,13 @@ jobs:
         run: |
           docker build \
             --build-arg REACT_APP_MOVIE_API_URL=${{ secrets.REACT_APP_MOVIE_API_URL }} \
-            -t 048186233838.dkr.ecr.us-east-1.amazonaws.com/frontend:latest \
+            -t 048186233838.dkr.ecr.us-east-1.amazonaws.com/frontend:${{ github.sha }} \
             starter/frontend
 
       - name: Push frontend Docker image
         run: |
           docker push \
-            048186233838.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+            048186233838.dkr.ecr.us-east-1.amazonaws.com/frontend:${{ github.sha }}
 
       - name: Update kubeconfig
         run: |
@@ -50,9 +102,14 @@ jobs:
         run: |
           kubectl apply -k starter/frontend/k8s
 
+      - name: Update frontend image to Git SHA
+        run: |
+          kubectl set image deployment/frontend \
+            frontend=048186233838.dkr.ecr.us-east-1.amazonaws.com/frontend:${{ github.sha }}
+
       - name: Verify Kubernetes deployment
         run: |
-          kubectl rollout status deployment/frontend --timeout=180s || true
+          kubectl rollout status deployment/frontend --timeout=180s
           echo "----- Logging - kubectl get all -----"
           kubectl get all
           echo "----- Logging - kubectl describe deploy -----"
