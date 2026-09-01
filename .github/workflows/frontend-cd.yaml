@@ -77,12 +77,21 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build frontend Docker image
+      - name: Verify frontend API secret
         run: |
-          docker build \
-            --build-arg REACT_APP_MOVIE_API_URL=${{ secrets.REACT_APP_MOVIE_API_URL }} \
-            -t 048186233838.dkr.ecr.us-east-1.amazonaws.com/frontend:${{ github.sha }} \
-            starter/frontend
+          if [ -z "${{ secrets.REACT_APP_MOVIE_API_URL }}" ]; then
+            echo "ERROR: REACT_APP_MOVIE_API_URL secret is empty or missing"
+            exit 1
+          fi
+          echo "REACT_APP_MOVIE_API_URL is configured"
+
+      - name: Verify frontend API secret
+        run: |
+          if [ -z "${{ secrets.REACT_APP_MOVIE_API_URL }}" ]; then
+            echo "ERROR: REACT_APP_MOVIE_API_URL secret is empty or missing"
+            exit 1
+          fi
+          echo "REACT_APP_MOVIE_API_URL is configured"
 
       - name: Push frontend Docker image
         run: |
