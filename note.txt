@@ -1,0 +1,9 @@
+
+GitHub Repository:
+https://github.com/SathyanarayanaAitla/movie-picture-pipeline
+
+Frontend LoadBalancer URL:
+http://a301ec83051bc4ca5b26c61da429203a-1834973763.us-east-1.elb.amazonaws.com
+
+Backend LoadBalancer URL:
+http://ab8e1a88516394196907f6c9b221e659-476058329.us-east-1.elb.amazonaws.com
