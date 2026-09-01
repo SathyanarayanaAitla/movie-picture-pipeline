@@ -92,6 +92,12 @@ jobs:
             exit 1
           fi
           echo "REACT_APP_MOVIE_API_URL is configured"
+      - name: Build frontend Docker image
+        run: |
+          docker build \
+            --build-arg REACT_APP_MOVIE_API_URL=${{ secrets.REACT_APP_MOVIE_API_URL }} \
+            -t 048186233838.dkr.ecr.us-east-1.amazonaws.com/frontend:${{ github.sha }} \
+            starter/frontend
 
       - name: Push frontend Docker image
         run: |
